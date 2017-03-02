@@ -7,7 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
-
+import math
 
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
@@ -124,12 +124,20 @@ class CustomPlayer:
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
 
+        best_score = -math.inf
+        best_move = (-1,-1)
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            pass
+            for possible_move in legal_moves:
+                possible_game = game.forecast_move(possible_move)
+                possible_score, recommended_move = self.minimax(possible_game,1,True)
+                if possible_score > best_score:
+                    best_move = possible_move
+                    best_score = possible_score
+            return best_move
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -173,7 +181,21 @@ class CustomPlayer:
             raise Timeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        # raise NotImplementedError
+
+        best_move=(-1,-1)
+        multiplier = 1 if maximizing_player else -1
+        best_score = math.inf * multiplier * (-1)
+        my_player = game.active_player if maximizing_player else game.inactive_player
+        for possible_move in game.get_legal_moves(my_player):
+            possible_game = game.forecast_move(possible_move)
+            current_score = self.score(possible_game, possible_game.active_player if maximizing_player else possible_game.inactive_player)
+            if current_score* multiplier > best_score:
+                best_score = current_score
+                best_move = possible_move
+
+        return (best_score, best_move)
+
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
