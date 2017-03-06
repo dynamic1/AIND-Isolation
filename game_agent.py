@@ -303,5 +303,61 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+
+        my_type = "MAX" if maximizing_player else "MIN"
+        logger.debug(f'DEPTH={depth} MINIMAX start {my_type} depth={depth}' )
+
+        #print(game.to_string())
+
+        best_move=(-1,-1)
+        multiplier = 1 if maximizing_player else -1
+        best_score = (- math.inf) #if maximizing_player else math.inf
+
+
+        # BIG MISTAKE
+        #my_player = game.active_player if maximizing_player else game.inactive_player
+        my_player = game.active_player
+        # for possible_move in game.get_legal_moves(my_player):
+        #     logger.debug(f'possible move: {possible_move}')
+
+
+        moves_couter = 0
+        forecast_couter = 0;
+        for possible_move in game.get_legal_moves(my_player):
+            forecast_couter = forecast_couter + 1
+            possible_game = game.forecast_move(possible_move)
+            #logger.debug(f'DEPTH={depth} MIMIMAX doing forecast counter={forecast_couter}, move={possible_move}, new_counter={possible_game.counts[1]}')
+            moves_couter = moves_couter+1
+            if depth == 1:
+                # current_score = self.score(possible_game, possible_game.active_player if maximizing_player else possible_game.inactive_player)
+                current_score = self.score(possible_game, possible_game.inactive_player if maximizing_player else possible_game.active_player)
+                #logger.debug(f'move: {possible_move}: current_score={current_score}')
+
+            else:
+                logger.debug(f'DEPTH={depth} MINIMAX calling recursive, depth = {depth-1}, maximizing={not maximizing_player} to evaluate possible_move {possible_move}')
+                current_score, optimal_move = self.alphabeta(possible_game, depth - 1, alpha, beta, not maximizing_player)
+                logger.debug(f'DEPTH={depth} move: {possible_move}: current_score={current_score}')
+                pass
+
+            if current_score* multiplier > best_score:
+                logger.debug(
+                    f'DEPTH={depth} choise {moves_couter}: move: {possible_move}: current_score={current_score}, multiplier={multiplier} ? best_score so far: {best_score} -> new best')
+                best_score = current_score
+                best_move = possible_move
+
+            else:
+                logger.debug(
+                    f'DEPTH={depth} choise {moves_couter}: move: {possible_move}: current_score={current_score}, multiplier={multiplier} ? best_score so far: {best_score} -> ignore')
+
+            # end recursion when alpha and beta say there is no better alternative to be found
+            if maximizing_player:
+                if best_score >= beta:
+                    return (best_score, best_move)
+                alpha = max(alpha, best_score)
+            else:
+                if best_score <= alpha:
+                    return(best_score,best_move)
+                beta = min(beta,best_score)
+
+        logger.debug(f'DEPTH={depth} minimax END: best move {best_move}: score={best_score}')
+        return (best_score, best_move)
