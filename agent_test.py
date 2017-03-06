@@ -306,7 +306,7 @@ class Project1Test(unittest.TestCase):
                              "branch being searched."))
 
     @timeout(5)
-    # @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
+    @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
     def test_get_move_interface(self):
         """ Test CustomPlayer.get_move interface with simple input """
         h, w = 9, 9  # board size
@@ -358,7 +358,7 @@ class Project1Test(unittest.TestCase):
                        "on the current game board."))
 
     @timeout(5)
-    @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
     def test_minimax(self):
         """ Test CustomPlayer.minimax
 
@@ -410,6 +410,10 @@ class Project1Test(unittest.TestCase):
             agentUT.time_left = lambda: 1e3
             _, move = agentUT.minimax(board, test_depth)
 
+            print(board.counts[0])
+            print(board.visited)
+            print(len(board.visited))
+            print(len(board.counter))
             num_explored_valid = board.counts[0] == counts[idx][0]
             num_unique_valid = board.counts[1] == counts[idx][1]
 

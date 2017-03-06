@@ -9,6 +9,28 @@ relative strength using tournament.py and include the results in your report.
 import random
 import math
 
+
+"""
+xalex
+use logging for debug
+"""
+import logging
+import logging.config
+
+logging.config.fileConfig('logging.conf')
+
+# create logger
+logger = logging.getLogger('simpleExample')
+
+## expale useage of logger
+# logger.debug('debug message')
+# logger.info('info message')
+# logger.warning('warn message')
+# logger.error('error message')
+# logger.critical('critical message')
+
+
+
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
@@ -131,8 +153,12 @@ class CustomPlayer:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
+            forecast_couter = 0
             for possible_move in legal_moves:
                 possible_game = game.forecast_move(possible_move)
+                forecast_couter = forecast_couter + 1
+                possible_game = game.forecast_move(possible_move)
+                logger.debug(f'DEPTH={depth} GET_MOVE doing forecast counter={forecast_couter}, move={possible_move}')
                 possible_score, recommended_move = self.minimax(possible_game,1,True)
                 if possible_score > best_score:
                     best_move = possible_move
@@ -141,9 +167,11 @@ class CustomPlayer:
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
+            logger.warning("Timeout occured in get_move()")
             pass
 
         # Return the best move from the last completed search iteration
+        logger.warning("Not implemented in get_move()")
         raise NotImplementedError
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -183,18 +211,53 @@ class CustomPlayer:
         # TODO: finish this function!
         # raise NotImplementedError
 
+        my_type = "MAX" if maximizing_player else "MIN"
+        logger.debug(f'DEPTH={depth} MINIMAX start {my_type} depth={depth}' )
+
+        print(game.to_string())
+
         best_move=(-1,-1)
         multiplier = 1 if maximizing_player else -1
-        best_score = math.inf * multiplier * (-1)
+        best_score = (- math.inf) #if maximizing_player else math.inf
+
+
         my_player = game.active_player if maximizing_player else game.inactive_player
+        # for possible_move in game.get_legal_moves(my_player):
+        #     logger.debug(f'possible move: {possible_move}')
+
+
+        moves_couter = 0
+        forecast_couter = 0;
         for possible_move in game.get_legal_moves(my_player):
+            forecast_couter = forecast_couter + 1
             possible_game = game.forecast_move(possible_move)
-            current_score = self.score(possible_game, possible_game.active_player if maximizing_player else possible_game.inactive_player)
+            logger.debug(f'DEPTH={depth} MIMIMAX doing forecast counter={forecast_couter}, move={possible_move}, new_counter={possible_game.counts[1]}')
+            moves_couter = moves_couter+1
+            if depth == 1:
+                # current_score = self.score(possible_game, possible_game.active_player if maximizing_player else possible_game.inactive_player)
+                current_score = self.score(possible_game, possible_game.inactive_player if maximizing_player else possible_game.active_player)
+                #logger.debug(f'move: {possible_move}: current_score={current_score}')
+
+            else:
+                logger.debug(f'DEPTH={depth} MINIMAX calling recursive, depth = {depth-1}, maximizing={not maximizing_player} to evaluate possible_move {possible_move}')
+                current_score, optimal_move = self.minimax(possible_game, depth - 1, not maximizing_player)
+                logger.debug(f'DEPTH={depth} move: {possible_move}: current_score={current_score}')
+                pass
+
             if current_score* multiplier > best_score:
+                logger.debug(
+                    f'DEPTH={depth} choise {moves_couter}: move: {possible_move}: current_score={current_score}, multiplier={multiplier} ? best_score so far: {best_score} -> new best')
                 best_score = current_score
                 best_move = possible_move
 
+            else:
+                logger.debug(
+                    f'DEPTH={depth} choise {moves_couter}: move: {possible_move}: current_score={current_score}, multiplier={multiplier} ? best_score so far: {best_score} -> ignore')
+
+        logger.debug(f'DEPTH={depth} minimax END: best move {best_move}: score={best_score}')
         return (best_score, best_move)
+        # return (0,(1,5))
+
 
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
