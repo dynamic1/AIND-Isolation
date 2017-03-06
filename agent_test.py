@@ -140,9 +140,14 @@ def makeEvalStop(limit, timer, value=None):
     """
 
     def score(game, player):
+        print(f"game counts: {game.counts[0]}")
         if timer.time_left() < 0:
-            raise TimeoutError("Timer expired during search. You must " +
-                               "return an answer before the timer reaches 0.")
+            # raise TimeoutError("Timer expired during search. You must " +
+            #                    "return an answer before the timer reaches 0.")
+            raise TimeoutError("Simulated Timer expired during search. when a fixed number "+
+                               "of node expansions have been perfomred "+
+                                "during the search. This ensures that the search algorithm should always be " +
+                                "in a predictable state regardless of node expansion order..")
         if limit == game.counts[0]:
             timer.time_limit = 0
         return 0
@@ -306,7 +311,7 @@ class Project1Test(unittest.TestCase):
                              "branch being searched."))
 
     @timeout(5)
-    @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
     def test_get_move_interface(self):
         """ Test CustomPlayer.get_move interface with simple input """
         h, w = 9, 9  # board size
@@ -482,7 +487,7 @@ class Project1Test(unittest.TestCase):
 
 
     @timeout(20)
-    @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
     def test_get_move(self):
         """ Test iterative deepening in CustomPlayer.get_move by placing an
         agent on the game board and performing ID minimax search, which

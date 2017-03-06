@@ -276,9 +276,16 @@ class Board(object):
         blocked, and which remain open.
         """
 
-        # return "99999999999999999999999"
-        p1_r, p1_c = self.__last_player_move__[self.__player_1__]
-        p2_r, p2_c = self.__last_player_move__[self.__player_2__]
+        # need exception handling when player_1 hasn't moved yet
+        try:
+            p1_r, p1_c = self.__last_player_move__[self.__player_1__]
+        except TypeError:
+            p1_r, p1_c = (-1, -1)
+        # need exception handling when player_2 hasn't moved yet
+        try:
+            p2_r, p2_c = self.__last_player_move__[self.__player_2__]
+        except TypeError:
+            p2_r,p2_c=(-1,-1)
 
         out = ''
 
