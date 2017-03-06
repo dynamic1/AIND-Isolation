@@ -276,7 +276,7 @@ class Board(object):
         blocked, and which remain open.
         """
 
-        return "99999999999999999999999"
+        # return "99999999999999999999999"
         p1_r, p1_c = self.__last_player_move__[self.__player_1__]
         p2_r, p2_c = self.__last_player_move__[self.__player_2__]
 

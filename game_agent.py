@@ -221,7 +221,9 @@ class CustomPlayer:
         best_score = (- math.inf) #if maximizing_player else math.inf
 
 
-        my_player = game.active_player if maximizing_player else game.inactive_player
+        # BIG MISTAKE
+        #my_player = game.active_player if maximizing_player else game.inactive_player
+        my_player = game.active_player
         # for possible_move in game.get_legal_moves(my_player):
         #     logger.debug(f'possible move: {possible_move}')
 
@@ -231,7 +233,7 @@ class CustomPlayer:
         for possible_move in game.get_legal_moves(my_player):
             forecast_couter = forecast_couter + 1
             possible_game = game.forecast_move(possible_move)
-            logger.debug(f'DEPTH={depth} MIMIMAX doing forecast counter={forecast_couter}, move={possible_move}, new_counter={possible_game.counts[1]}')
+            #logger.debug(f'DEPTH={depth} MIMIMAX doing forecast counter={forecast_couter}, move={possible_move}, new_counter={possible_game.counts[1]}')
             moves_couter = moves_couter+1
             if depth == 1:
                 # current_score = self.score(possible_game, possible_game.active_player if maximizing_player else possible_game.inactive_player)
