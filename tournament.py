@@ -34,6 +34,7 @@ from game_agent import CustomPlayer
 from game_agent import custom_score
 
 NUM_MATCHES = 5  # number of matches against each opponent
+NUM_MATCHES = 1  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -104,8 +105,12 @@ def play_match(player1, player2):
 
 def play_round(agents, num_matches):
     """
-    Play one round (i.e., a single match between each pair of opponents)
+    Play one round (i.e., 2xnum_matches matches between each pair of opponents, each player gets to move first in num_matches matches)
     """
+    for idx, agent in enumerate(agents):
+        print(f"agent {idx}: {agent.name}")
+        print(agent)
+
     agent_1 = agents[-1]
     wins = 0.
     total = 0.
@@ -117,15 +122,18 @@ def play_round(agents, num_matches):
 
         counts = {agent_1.player: 0., agent_2.player: 0.}
         names = [agent_1.name, agent_2.name]
-        print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
+        # print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
+        print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names))
 
         # Each player takes a turn going first
         for p1, p2 in itertools.permutations((agent_1.player, agent_2.player)):
-            for _ in range(num_matches):
+            # print(f"p1= {p1}, p2={p2}")
+            for i in range(num_matches):
                 score_1, score_2 = play_match(p1, p2)
                 counts[p1] += score_1
                 counts[p2] += score_2
                 total += score_1 + score_2
+                print (f"game {i} scores: {score_1}, {score_2}; to date {counts[p1]} - {counts[p2]}, total={total}")
 
         wins += counts[agent_1.player]
 
@@ -160,8 +168,10 @@ def main():
     # systems; i.e., the performance of the student agent is considered
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
-    test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
+    # test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
+    #               Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
+    test_agents = [ Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student"),
+                    Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved")]
 
     print(DESCRIPTION)
     for agentUT in test_agents:
@@ -170,7 +180,9 @@ def main():
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        agents = random_agents + mm_agents + ab_agents + [agentUT]
+        agents = random_agents + mm_agents + ab_agents + [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved x") ] + [agentUT]
+        # agents =  [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved x") ] + [agentUT]
+        # agents =  random_agents + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 
         print("\n\nResults:")

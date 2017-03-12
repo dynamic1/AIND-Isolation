@@ -12,7 +12,7 @@ import timeit
 
 from copy import deepcopy
 from copy import copy
-
+import queue
 
 TIME_LIMIT_MILLIS = 200
 
@@ -304,11 +304,11 @@ class Board(object):
                     out += '-'
 
                 out += ' | '
-            out += '\n'
+            out += '\n\r'
 
         return out
 
-    def play(self, time_limit=TIME_LIMIT_MILLIS):
+    def play(self, q, time_limit=TIME_LIMIT_MILLIS):
         """
         Execute a match between the players by alternately soliciting them
         to select a move and applying it in the game.
@@ -358,3 +358,4 @@ class Board(object):
                 return self.__inactive_player__, move_history, "illegal move"
 
             self.apply_move(curr_move)
+            q.put(self)
