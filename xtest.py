@@ -18,7 +18,7 @@ from sample_players import open_move_score
 from sample_players import improved_score
 from game_agent import CustomPlayer
 from game_agent import custom_score
-from game_agent import custom_score_x
+# from game_agent import custom_score_x
 from collections import namedtuple
 
 
@@ -28,7 +28,7 @@ logger = xlogger()
 
 Agent = namedtuple("Agent", ["player", "name"])
 
-TIME_LIMIT = 150
+TIME_LIMIT = 10000
 
 HEURISTICS = [("Null", null_score),
               ("Open", open_move_score),
@@ -74,7 +74,7 @@ for x in range(7):
         # print(x,y, my_agent.player.score(current_game, my_agent.player), end=' ')
         print(my_agent.player.score(current_game, my_agent.player), end=' ')
     print()
-
+"""
 game.__board_state__= [[4,0,0,0,4,0,0],
                        [0,0,4,0,4,4,4],
                        [0,4,4,4,4,1,0],
@@ -83,7 +83,7 @@ game.__board_state__= [[4,0,0,0,4,0,0],
                        [4,0,4,4,4,0,0],
                        [4,0,4,2,0,0,0]]
 game.__last_player_move__ = {game.__player_1__: (2,5), game.__player_2__: (6,3)}
-
+"""
 print(game.to_string())
 
 curr_time_millis = lambda: 1000 * timeit.default_timer()
@@ -91,11 +91,11 @@ move_start = curr_time_millis()
 time_left = lambda : TIME_LIMIT - (curr_time_millis() - move_start)
 
 move = my_agent.player.get_move(game, game.get_legal_moves(my_agent.player),time_left)
-print(move)
+#print(move)
 
-logger.set_context("context1")
-logger.debug("message 1")
-logger.push_context(" context_2")
-logger.debug("message_2")
-logger.pop_context()
-logger.debug("message 3")
+# logger.set_context("context1")
+# logger.debug("message 1")
+# logger.push_context(" context_2")
+# logger.debug("message_2")
+# logger.pop_context()
+# logger.debug("message 3")
