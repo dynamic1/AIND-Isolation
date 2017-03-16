@@ -58,9 +58,9 @@ def custom_score(game, player):
     if False and game.move_count<2:
         return float(len( game.get_legal_moves(player) ))
 
-    # return float(len( game.get_legal_moves(player) ) )
-    return float(len( game.get_legal_moves(player) ) - len(game.get_legal_moves(game.get_opponent(player))))
-    #return float(len( game.get_legal_moves(player) ) - 0.7*len(game.get_legal_moves(game.get_opponent(player))))
+    x, y = game.get_player_location(player)
+    delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    return float(len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player)))) - delta
 
 
 class CustomPlayer:
