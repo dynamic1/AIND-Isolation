@@ -12,10 +12,11 @@ import timeit
 
 from copy import deepcopy
 from copy import copy
+from xlogger import xlogger
 
 
 TIME_LIMIT_MILLIS = 200
-
+logger = xlogger('playLogger')
 
 class Board(object):
     """
@@ -332,6 +333,7 @@ class Board(object):
 
         while True:
 
+            logger.debug(f"{self.to_string()}", False)
             legal_player_moves = self.get_legal_moves()
 
             game_copy = self.copy()
@@ -340,6 +342,7 @@ class Board(object):
             time_left = lambda : time_limit - (curr_time_millis() - move_start)
             curr_move = self.active_player.get_move(game_copy, legal_player_moves, time_left)
             move_end = time_left()
+            logger.debug(f"{self.move_count}: player {self.active_player} chose {curr_move} in {move_end}ms", False)
 
             # print move_end
 

@@ -64,80 +64,6 @@ adversary = Agent(RandomPlayer(), "Random")
 # game = Board(my_agent.player, adversary.player,7,7)
 
 """
-print(' ', end='')
-for x in range(7):
-    print("%4d" % x, end='')
-print()
-for x in range(7):
-    print(x,' ', end='')
-    for y in range(7):
-        current_game = game.forecast_move((x,y))
-        # print(x,y, my_agent.player.score(current_game, my_agent.player), end=' ')
-        print(my_agent.player.score(current_game, my_agent.player), end=' ')
-    print()
-"""
-
-"""
-game.__board_state__= [[4,0,0,0,4,0,0],
-                       [0,0,4,0,4,4,4],
-                       [0,4,4,4,4,1,0],
-                       [0,4,4,4,4,4,0],
-                       [4,4,4,4,0,0,4],
-                       [4,0,4,4,4,0,0],
-                       [4,0,4,2,0,0,0]]
-game.__last_player_move__ = {game.__player_1__: (2,5), game.__player_2__: (6,3)}
-"""
-"""
-game.__board_state__= [[4,4,4,1,4,0,4],
-                       [4,4,4,4,4,0,0],
-                       [4,4,4,4,0,4,0],
-                       [4,4,4,4,0,0,0],
-                       [0,4,4,0,4,4,4],
-                       [4,0,4,4,0,0,4],
-                       [4,0,0,0,4,2,0]]
-game.__last_player_move__ = {game.__player_1__: (0,3), game.__player_2__: (6,5)}
-"""
-"""
-game.__board_state__= [[4,4,4,4,4,4,0],
-                       [4,4,4,4,0,4,4],
-                       [4,4,4,4,4,0,4],
-                       [0,4,2,0,4,4,4],
-                       [4,4,4,4,4,4,4],
-                       [4,0,0,4,4,0,0],
-                       [0,4,4,4,0,4,4]]
-game.__last_player_move__ = {game.__player_1__: (1,1), game.__player_2__: (3,2)}
-"""
-"""
-game.__board_state__= [[4,0,0,4,4,0,0],
-                       [0,4,4,4,0,4,4],
-                       [0,0,0,1,4,0,0],
-                       [4,0,4,0,4,0,0],
-                       [0,0,0,0,0,0,4],
-                       [0,2,0,0,0,0,0],
-                       [0,0,0,0,0,4,0]]
-game.__last_player_move__ = {game.__player_1__: (2,3), game.__player_2__: (5,1)}
-"""
-"""
-game.__board_state__= [[4,0,0,4,4,0,0],
-                       [0,4,4,4,0,4,4],
-                       [0,0,0,4,4,0,0],
-                       [4,0,4,0,4,0,0],
-                       [0,0,4,4,0,0,4],
-                       [0,4,0,0,1,0,0],
-                       [0,0,0,0,2,4,0]]
-game.__last_player_move__ = {game.__player_1__: (5,4), game.__player_2__: (6,4)}
-"""
-"""
-game = Board(my_agent.player, adversary.player, 7, 7)
-game.__board_state__= [[0,0,0,0,0,0,0],
-                       [0,0,0,0,1,0,0],
-                       [0,0,4,0,0,0,0],
-                       [0,2,0,0,0,0,0],
-                       [0,0,0,0,0,0,0],
-                       [4,0,0,0,0,0,0],
-                       [0,0,0,0,0,0,0]]
-                       """
-"""
 game = Board(my_agent.player, adversary.player, 7, 7)
 game.__board_state__= [[0,0,0,0,4,4,0],
                        [0,0,4,4,2,0,0],
@@ -164,6 +90,47 @@ move = my_agent.player.get_move(game, game.get_legal_moves(my_agent.player),time
 print(move)
 """
 
+game = Board(my_agent.player, adversary.player, 7, 7)
+print(game.to_string())
+
+moves_by_turn = [[(2, 2), (6, 1)], [(3, 4), (5, 3)], [(4, 2), (4, 1)], [(2, 3), (6, 0)], [(4, 4), (5, 2)], [(3, 2), (3, 3)], [(2, 4), (1, 2)], [(4, 3), (0, 0)], [(3, 5), (2, 1)], [(1, 4), (0, 2)], [(2, 6), (1, 0)], [(4, 5), (3, 1)], [(6, 4), (5, 0)], [(5, 6), (6, 2)], [(-1, -1)]]
+turn_count=0
+TIME_LIMIT = 1000
+for turn in moves_by_turn:
+
+    turn_count = turn_count +1
+    p1_move = turn[0]
+    p2_move = turn[1] if len(turn) ==2 else None
+
+    curr_time_millis = lambda: 1000 * timeit.default_timer()
+    move_start = curr_time_millis()
+    time_left = lambda: TIME_LIMIT - (curr_time_millis() - move_start)
+    my_best_move = my_agent.player.get_move(game, game.get_legal_moves(my_agent.player),time_left)
+
+    same_move = my_best_move == p1_move
+    msg_string = 'OK' if same_move else 'NOT!'
+    print(f"turn {turn_count} my best move: {my_best_move}, recorded move {p1_move} {msg_string}")
+    game.apply_move(p1_move)
+    if game.utility(my_agent.player) != 0:
+        print(game.to_string())
+        if game.is_loser(my_agent.player):
+            print ("game over, I lose")
+        else:
+            print ("game over, I win")
+        break
+
+    game.apply_move(p2_move)
+    print(game.to_string())
+    if game.utility(my_agent.player) != 0:
+        if game.is_loser(my_agent.player):
+            print ("game over, I lose")
+        else:
+            print ("game over, I win")
+        break
+
+
+
+    """
 again = True
 while again:
     game = Board(my_agent.player, adversary.player,7,7)
@@ -181,12 +148,4 @@ while again:
     print(history)
     again = (winner == my_agent.player)
 
-# """
-# print(move)
-
-# logger.set_context("context1")
-# logger.debug("message 1")
-# logger.push_context(" context_2")
-# logger.debug("message_2")
-# logger.pop_context()
-# logger.debug("message 3")
+"""

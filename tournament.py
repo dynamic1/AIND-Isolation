@@ -34,7 +34,7 @@ from game_agent import CustomPlayer
 from game_agent import custom_score
 
 NUM_MATCHES = 5  # number of matches against each opponent
-NUM_MATCHES = 1  # number of matches against each opponent
+NUM_MATCHES = 10  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -109,7 +109,7 @@ def play_round(agents, num_matches):
     """
     for idx, agent in enumerate(agents):
         print(f"agent {idx}: {agent.name}")
-        print(agent)
+        # print(agent)
 
     agent_1 = agents[-1]
     wins = 0.
@@ -174,15 +174,17 @@ def main():
                     Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved")]
 
     print(DESCRIPTION)
+
+    NUM_MATCHES = 20
     for agentUT in test_agents:
         print("")
         print("*************************")
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        agents = random_agents + mm_agents + ab_agents + [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved x") ] + [agentUT]
+        # agents = random_agents + mm_agents + ab_agents + [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved x") ] + [agentUT]
         # agents =  [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved x") ] + [agentUT]
-        # agents =  random_agents + [agentUT]
+        agents =  random_agents + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 
         print("\n\nResults:")

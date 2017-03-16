@@ -4,11 +4,11 @@ import sys
 
 
 class xlogger(object):
-    def __init__(self):
+    def __init__(self, logger_name='xLogger'):
         logging.config.fileConfig('xlogging.conf')
 
         # create logger
-        self.__logger__ = logging.getLogger('xLogger')
+        self.__logger__ = logging.getLogger(logger_name)
         self.__context_stack__ = []
         self.__context__ = ""
         pass
@@ -29,7 +29,7 @@ class xlogger(object):
         self.__context_stack__.pop()
         self.__update_context__()
 
-    def debug(self, message):
+    def debug(self, message, meta=True):
         level = "debug"
         """
         obj = sys._getframe(1).f_code
@@ -38,7 +38,10 @@ class xlogger(object):
 
         exit()
         """
-        self.__logger__.debug(f"{level}: {self.__context__}: {message}")
+        if meta:
+            self.__logger__.debug(f"{level}: {self.__context__}: {message}")
+        else:
+            self.__logger__.debug(message)
 
     def warning(self, message):
         level = "warning"

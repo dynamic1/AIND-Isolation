@@ -65,48 +65,26 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    if game.is_loser(player):
-        return float("-inf")
+    if False:
+        if game.is_loser(player):
+            # return float("-inf")
+            return float(-100)
 
-    if game.is_winner(player):
-        return float("inf")
+        if game.is_winner(player):
+            # return float("inf")
+            return float(100)
 
+    if game.move_count<2:
+        return float(len( game.get_legal_moves(player) ))
+
+    # return 0
     # return float(len( game.get_legal_moves(player) ) )
+    # logger.debug(f"my moves:{len(game.get_legal_moves(player))}, opp_moves: {len(game.get_legal_moves(game.get_opponent(player)))}")
+    return float(len( game.get_legal_moves(player) ) - 10*len(game.get_legal_moves(game.get_opponent(player))))
     return float(len( game.get_legal_moves(player) ) - 0.7*len(game.get_legal_moves(game.get_opponent(player))))
 
-def custom_score_xxxx(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
+    # return float(len(game.get_legal_moves(player)) + x)
 
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
-
-    if game.is_loser(player):
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-
-    (x,y) = game.get_player_location(player)
-    x = abs(game.width/2 - x) + abs(game.width/2 - y)
-
-    return float(len( game.get_legal_moves(player) ) +x)
 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
@@ -139,7 +117,7 @@ class CustomPlayer:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10.):
+                 iterative=True, method='minimax', timeout=20.):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -227,8 +205,13 @@ class CustomPlayer:
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
 
-        best_score = -math.inf
-        best_move = (-1,-1)
+        # best_score = -math.inf
+        if len(legal_moves) < 1:
+            logger.error("no legal moves")
+            logger.pop_context()
+            return (-1,-1)
+
+        best_move = legal_moves[0]
         current_depth = 0 if self.iterative else self.search_depth
         try:
             # The search method call (alpha beta or minimax) should happen in
@@ -236,6 +219,9 @@ class CustomPlayer:
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
             forecast_couter = 0
+
+            local_best_move = (-1,-1)
+            local_best_score = -math.inf
 
             reiterate = True
 
@@ -246,6 +232,7 @@ class CustomPlayer:
                 logger.debug(f'depth={current_depth}, legal_moves={legal_moves}')
                 if len(legal_moves) <1:
                     logger.debug(f'depth={current_depth}, no legal moves, wil return (-1,-1)')
+                    logger.pop_context()
                     return best_move
 
                 for move_idx, possible_move in enumerate(legal_moves):
@@ -260,23 +247,25 @@ class CustomPlayer:
                     if self.method == 'minimax':
                         possible_score, recommended_move = self.minimax(possible_game,current_depth, False )
                     else:
+                        # possible_score, recommended_move = self.alphabeta(possible_game, current_depth, -math.inf, math.inf, False)
                         possible_score, recommended_move = self.alphabeta(possible_game, current_depth, -math.inf, math.inf, False)
                     logger.debug(
                         f'time_left={round(time_left())}, results for move number {move_idx}, move={possible_move} with method {self.method}, depth={current_depth}: {possible_move}-> {possible_score}')
-                    if possible_score > best_score:
-                        best_move = possible_move
-                        best_score = possible_score
+                    if possible_score > local_best_score:
+                        local_best_move = possible_move
+                        local_best_score = possible_score
 
                     time_left_after = self.time_left()
-                    self.stats_by_depth[current_depth] = (best_move, best_score, round(time_left_after), round(time_left_at_start- time_left_after), self.current_depth_nodes)
+                    self.stats_by_depth[current_depth] = (best_move, local_best_score, round(time_left_after), round(time_left_at_start- time_left_after), self.current_depth_nodes)
 
                 if not self.iterative:
-                    logger.warning(f"non iterative, finish with best move {best_move}")
+                    logger.warning(f"non iterative, finish with best move {local_best_move}")
                     logger.pop_context()
-                    return best_move
+                    return local_best_move
 
-                logger.debug(f"completed current_depth={current_depth}, best move {best_move}")
+                logger.debug(f"completed current_depth={current_depth}, best move {local_best_move}, score = {local_best_score}")
                 logger.pop_context()
+                best_move = local_best_move
                 current_depth = current_depth+1
 
         except Timeout:
@@ -286,6 +275,7 @@ class CustomPlayer:
             logger.debug(f"reached maximum depth of {current_depth}")
             for i_d,(i_move, i_score, i_time_left, i_duration, i_nodes) in self.stats_by_depth.items():
                 logger.debug(f"depth={i_d:3}, move={i_move}, score={i_score:2}, time_left={i_time_left:4}, duration={i_duration:4}, nodes={i_nodes:3}")
+            logger.pop_context()
             return best_move
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -353,22 +343,14 @@ class CustomPlayer:
         # if there are no available moves
         if len(legal_moves) == 0:
             if (game.is_loser(my_player)):
-                logger.debug(f'should not have reached this point: i lose')
+                logger.debug(f'should not have reached this point: i lose, return score: {-math.inf*multiplier}')
                 logger.pop_context()
-                return (-math.inf, current_move)
+                return (-math.inf * multiplier, current_move)
 
             logger.error(f'should not have reached this point: do i win?')
             logger.pop_context()
-            return (-math.inf, (-1, -1))
+            return (-math.inf*multiplier, (-1, -1))
 
-
-
-            # if there are no available moves
-        if len(legal_moves)==0:
-            logger.error(f'should not have reached this point:')
-            # logger.debug(f'f={self.my_function_name()}: evaluating leaf: {current_move} -> {current_score}')
-            logger.pop_context()
-            return (-math.inf, (-1,-1))
 
         moves_couter = 0
         forecast_couter = 0
@@ -570,104 +552,108 @@ class CustomPlayer:
         my_type = "MAX" if maximizing_player else "MIN"
         last_move = game.__last_player_move__[game.inactive_player]
         logger.push_context(f"alphabeta_{depth} {my_type} {last_move} pos={game.get_player_location(game.active_player)}")
-        logger.debug("start")
-        # logger.debug(f'f={self.my_function_name()}: DEPTH={depth} {my_type} my pos is {game.get_player_location(game.active_player)}' )
+        # logger.debug("start")
         logger.print( game.to_string())
 
         best_move=(-1,-1)
-        multiplier = 1 if maximizing_player else -1
+        # multiplier = 1 if maximizing_player else -1
         best_score = (- math.inf)
 
-        my_player = game.active_player
-        other_player = game.inactive_player
+        my_player = game.active_player if maximizing_player else game.inactive_player
+        #other_player = game.inactive_player
 
-        current_score = self.score(game, other_player)
-        current_move = game.get_player_location(game.inactive_player)
-        # if depth is 0, will evaluate current branch using just the self.score function, no further recursion
+        current_score = self.score(game, my_player)
+        current_move = game.get_player_location(my_player)
+        """
+        if depth is 0, will evaluate current branch using just the self.score function, no further recursion
+        """
         if depth ==0:
             logger.debug(f'reached max depth: {current_move} -> {current_score}')
             logger.pop_context()
             return (current_score, current_move)
 
         # check if this would be a winning a losing state
-        utility_for_me = game.utility(my_player)
-        utility_for_opponent = game.utility(other_player)
-        logger.debug(f"utility for me: {utility_for_me}, utility_for_opponent: {utility_for_opponent}")
+        # utility_for_me = game.utility(my_player)
+        # utility_for_opponent = game.utility(other_player)
+        # logger.debug(f"utility for me: {utility_for_me}, utility_for_opponent: {utility_for_opponent}")
 
 
-        # assert depth > 0
-        # will check for legal moves and recurse to evaluate each legal move
-        legal_moves = game.get_legal_moves(my_player)
+        """
+        will check for legal moves and recurse to evaluate each legal move
+        """
+        legal_moves = game.get_legal_moves(game.active_player)
 
         # if there are no available moves
         if len(legal_moves)==0:
             if(game.is_loser(my_player)):
-                logger.debug(f'should not have reached this point: i lose')
+                logger.warning(f'should not have reached this point: i lose')
                 logger.pop_context()
-                return (-math.inf,current_move)
-            else:
-                logger.error(f'should not have reached this point: do i win?')
-            # logger.debug(f'f={self.my_function_name()}: evaluating leaf: {current_move} -> {current_score}')
+                return (-math.inf ,current_move)
+
+            logger.warning(f'should not have reached this point: do i win?')
             logger.pop_context()
-            return (-math.inf, (-1,-1))
+            return (math.inf , current_move)
 
-        moves_couter = 0
+        moves_counter = 0
         forecast_couter = 0
-        logger.debug(f"possible moves: {legal_moves}")
+        # logger.debug(f"possible moves: {legal_moves}")
 
-        possible_scores = {}
-        possible_games = {}
-
-        #try to sort possible moves so that I would investigate best first
+        """
+        try to sort possible moves so that I would investigate best first
+        """
         l_moves = []
         for possible_move in legal_moves:
-
             forecast_couter = forecast_couter + 1
             possible_game = game.forecast_move(possible_move)
             possible_score = self.score(possible_game,my_player)
             l_moves.append({'move':possible_move, 'score':possible_score, 'game':possible_game})
 
-        l_sorted_moves = sorted(l_moves, key=lambda x: x['score'], reverse=True)
-        # l=(x.move, x.score) for x in l_sorted_moves
-        logger.debug(f"possible_scores: {l_sorted_moves}")
+        sort_before_alphabeta = True
+        sort_before_alphabeta = False
+        if sort_before_alphabeta:
+            l_sorted_moves = sorted(l_moves, key=lambda x: x['score'], reverse=True)
+        else:
+            l_sorted_moves = l_moves
 
-        for possible_move in legal_moves:
+        for branch in l_sorted_moves:
+            logger.debug(f"possible branch: {branch['move']} -> {branch['score']}")
+
+        # for possible_move in legal_moves:
+        for branch in l_sorted_moves:
 
             self.current_depth_nodes += 1
-            forecast_couter = forecast_couter + 1
-            possible_game = game.forecast_move(possible_move)
-            #logger.debug(f'DEPTH={depth} MIMIMAX doing forecast counter={forecast_couter}, move={possible_move}, new_counter={possible_game.counts[1]}')
-            moves_couter = moves_couter+1
-
+            possible_game = branch['game']
+            possible_move = branch['move']
+            moves_counter = moves_counter+1
 
             logger.debug(f'calling recursive, depth = {depth-1}, maximizing={not maximizing_player} to evaluate possible_move {possible_move}')
             current_score, optimal_move = self.alphabeta(possible_game, depth - 1, alpha, beta, not maximizing_player)
             logger.debug(f'move: {possible_move}: current_score={current_score}')
 
-            if current_score* multiplier > best_score:
+            if ( maximizing_player and (current_score > best_score) ) or ( (not maximizing_player) and (current_score<best_score) ):
                 logger.debug(
-                    f'choice {moves_couter}: move: {possible_move}: current_score={current_score}, multiplier={multiplier} ? best_score so far: {best_score} -> new best')
+                    f'choice {moves_counter}: move: {possible_move}: current_score={current_score} best_score so far: {best_score} -> new best')
                 best_score = current_score
                 best_move = possible_move
 
             else:
                 logger.debug(
-                    f'choice {moves_couter}: move: {possible_move}: current_score={current_score}, multiplier={multiplier} ? best_score so far: {best_score} -> ignore')
+                    f'choice {moves_counter}: move: {possible_move}: current_score={current_score} best_score so far: {best_score} -> ignore')
 
 
-            # end recursion when alpha and beta say there is no better alternative to be found
-            if maximizing_player:
-                if best_score >= beta:
-                    logger.debug(f"STOP evaluating because best_score>= beta ( {best_score} >= {beta} )")
-                    logger.pop_context()
-                    return (best_score, best_move)
-                alpha = max(alpha, best_score)
-            else:
-                if best_score <= alpha:
-                    logger.debug(f"STOP evaluating because best_score<= alpha ( {best_score} <= {alpha} )")
-                    logger.pop_context()
-                    return (best_score, best_move)
-                beta = min(beta, best_score)
+            """
+            end recursion when alpha and beta say there is no better alternative to be found
+            """
+            if best_score > beta:
+                logger.debug(f"STOP evaluating because best_score>= beta ( {best_score} >= {beta} )")
+                logger.pop_context()
+                return (best_score, best_move)
+            alpha = max(alpha, best_score)
+            if best_score < alpha:
+                logger.debug(f"STOP evaluating because best_score<= alpha ( {best_score} <= {alpha} )")
+                logger.pop_context()
+                return (best_score, best_move)
+            beta = min(beta, best_score)
 
         logger.debug(f'END: best move {best_move}: score={best_score}')
         logger.pop_context()
