@@ -6,35 +6,16 @@ augment the test suite with your own test cases to further test your code.
 You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
+import logging.config
 import math
 import sys
 
-
-"""
-xalex
-use logging for debug
-"""
-import logging
-import logging.config
-
 from xlogger import xlogger
-from pprint import pprint
-
 
 logging.config.fileConfig('logging.conf')
 
 # create logger
-#logger = logging.getLogger('simpleExample')
 logger = xlogger()
-
-## expale useage of logger
-# logger.debug('debug message')
-# logger.info('info message')
-# logger.warning('warn message')
-# logger.error('error message')
-# logger.critical('critical message')
-
-
 
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
@@ -77,13 +58,9 @@ def custom_score(game, player):
     if False and game.move_count<2:
         return float(len( game.get_legal_moves(player) ))
 
-    # return 0
     # return float(len( game.get_legal_moves(player) ) )
-    # logger.debug(f"my moves:{len(game.get_legal_moves(player))}, opp_moves: {len(game.get_legal_moves(game.get_opponent(player)))}")
-    return float(len( game.get_legal_moves(player) ) - 10*len(game.get_legal_moves(game.get_opponent(player))))
-    return float(len( game.get_legal_moves(player) ) - 0.7*len(game.get_legal_moves(game.get_opponent(player))))
-
-    # return float(len(game.get_legal_moves(player)) + x)
+    return float(len( game.get_legal_moves(player) ) - len(game.get_legal_moves(game.get_opponent(player))))
+    #return float(len( game.get_legal_moves(player) ) - 0.7*len(game.get_legal_moves(game.get_opponent(player))))
 
 
 class CustomPlayer:
@@ -118,13 +95,15 @@ class CustomPlayer:
 
     def __init__(self, search_depth=3, score_fn=custom_score,
                  iterative=True, method='minimax', timeout=20.):
+        self.max_depth_reached = 0
+        self.stats_by_depth = {}
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
         self.method = method
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
-        self.current_depth_nodes = 0;
+        self.current_depth_nodes = 0
         #xalex
         self.moves_by_depth = []
 
@@ -133,13 +112,6 @@ class CustomPlayer:
         :return: name of caller
         """
 
-        """
-        obj = sys._getframe(1).f_code
-        for attr in dir(obj):
-            print(            "obj.%s = %s\n" % (attr, getattr(obj, attr)))
-
-        exit()
-        """
         return sys._getframe(1).f_code.co_name
 
     def get_move(self, game, legal_moves, time_left):
@@ -180,7 +152,6 @@ class CustomPlayer:
 
         self.time_left = time_left
 
-        self.stats_by_depth = {}
         # print()
         logger.push_context(f"get_move")
         logger.print(game.to_string())
@@ -224,11 +195,10 @@ class CustomPlayer:
             local_best_score = -math.inf
 
             reiterate = True
-            self.current_depth_nodes = 0;
+            self.current_depth_nodes = 0
 
             while reiterate:
-                self.max_depth_reached = 0;
-                self.current_depth_nodes = 0;
+                self.current_depth_nodes = 0
                 logger.push_context(f"get_move_{current_depth}")
                 logger.debug(f'depth={current_depth}, legal_moves={legal_moves}')
                 if len(legal_moves) <1:
@@ -241,7 +211,7 @@ class CustomPlayer:
                     possible_game = game.forecast_move(possible_move)
                     logger.debug(f'forecasting move {possible_move}')
                     logger.print(possible_game.to_string())
-                    forecast_couter = forecast_couter + 1
+                    forecast_couter += 1
                     # possible_game = game.forecast_move(possible_move)
                     logger.debug(f'time_left={round(time_left())}, evaluating move number {move_idx+1}, move={possible_move} with method {self.method}, depth={current_depth}')
                     # possible_score, recommended_move = self.minimax(possible_game,1,True)
@@ -266,7 +236,7 @@ class CustomPlayer:
                 logger.debug(f"completed current_depth={current_depth}, best move {local_best_move}, score = {local_best_score}")
                 logger.pop_context()
                 best_move = local_best_move
-                current_depth = current_depth+1
+                current_depth += 1
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -363,10 +333,10 @@ class CustomPlayer:
         logger.debug(f"there are {len(legal_moves)} possible moves: {legal_moves}")
         for possible_move in legal_moves:
 
-            forecast_couter = forecast_couter + 1
+            forecast_couter += 1
             possible_game = game.forecast_move(possible_move)
             #logger.debug(f'DEPTH={depth} MIMIMAX doing forecast counter={forecast_couter}, move={possible_move}, new_counter={possible_game.counts[1]}')
-            moves_couter = moves_couter+1
+            moves_couter += 1
 
             logger.debug(f'calling recursive, depth = {depth-1}, maximizing={not maximizing_player} to evaluate possible_move {possible_move}')
             current_score, optimal_move = self.minimax(possible_game, depth - 1, not maximizing_player)
@@ -510,11 +480,11 @@ class CustomPlayer:
             """
 
         for possible_move in legal_moves:
-            forecast_couter = forecast_couter + 1
+            forecast_couter += 1
             possible_game = game.forecast_move(possible_move)
             # possible_score = self.score(possible_game, scoring_player)
             # l_moves.append({'move': possible_move, 'score': possible_score, 'game': possible_game})
-            moves_counter = moves_counter+1
+            moves_counter += 1
 
 
             # logger.debug(f'calling recursive, depth = {depth-1}, maximizing={not maximizing_player} to evaluate possible_move {possible_move}')
