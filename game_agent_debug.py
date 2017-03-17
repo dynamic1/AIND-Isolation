@@ -17,12 +17,17 @@ logging.config.fileConfig('logging.conf')
 # create logger
 logger = xlogger()
 
+directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
+              (1, -2), (1, 2), (2, -1), (2, 1)]
+
+directions_2 = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
+              (1, -2), (1, 2), (2, -1), (2, 1)]
+
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
 
-#open move
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -46,22 +51,157 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    if False:
-        if game.is_loser(player):
-            # return float("-inf")
-            return float(-100)
-
-        if game.is_winner(player):
-            # return float("inf")
-            return float(100)
-
-    if False and game.move_count<2:
-        return float(len( game.get_legal_moves(player) ))
-
     x, y = game.get_player_location(player)
     delta = float((abs(3 - x) + abs(3 - y)) / 2)
     return float(len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player)))) - delta
 
+
+def custom_score_adv(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    return float(len(game.get_legal_moves(player)) - 0.7 * len(game.get_legal_moves(game.get_opponent(player))))
+
+def custom_score_adv_opt(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    xp,yp = game.__last_player_move__[player]
+    xo,yo = game.__last_player_move__[game.get_opponent(player)]
+
+    score = 0
+    for dx, dy in directions:
+        if 0 <= xp+dx < game.height and 0 <= yp+dy < game.width and \
+           game.__board_state__[xp+dx][yp+dy] == game.BLANK:
+            score += 1
+        if 0 <= xo+dx < game.height and 0 <= yo+dy < game.width and \
+           game.__board_state__[xo+dx][yo+dy] == game.BLANK:
+            score += ( -.7)
+
+    return float(score)
+
+
+def custom_score_center(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    delta = float(abs(3 - x) + abs(3 - y))
+    return float(len(game.get_legal_moves(player)) - delta /3)
+
+def custom_score_margins(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    delta = float(abs(3 - x) + abs(3 - y))
+    return float(len(game.get_legal_moves(player)) + delta /3)
+
+
+
+def custom_score_coop(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    return float(len(game.get_legal_moves(player)) + 0.5 * len(game.get_legal_moves(game.get_opponent(player))))
 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
@@ -157,20 +297,6 @@ class CustomPlayer:
         logger.print(game.to_string())
         logger.debug(f'method={self.method} ID={self.iterative} ')
         logger.debug(f'START, time_lef={time_left()}, my pos is {game.get_player_location(game.active_player)}')
-
-        """
-        if game.move_count == 0:
-            logger.debug('this is the opening move, i chose center (3,3)')
-            return (3,3)
-
-        if game.move_count == 1:
-            if game.__board_state__[3,3] == game.BLANK:
-                logger.debug('this is the second move of the game, i chose center (3,3)')
-                return (3,3)
-            else:
-                logger.debug('this is the second move of the game, center (3,3) is blocked, i chose (3,4)')
-                return (3, 4)
-        """
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -515,19 +641,6 @@ class CustomPlayer:
                 logger.debug(f"STOP evaluating because alpha >= beta ( {alpha} >= {beta} )")
                 logger.pop_context()
                 return (best_score, best_move)
-
-            """
-            if best_score > beta:
-                logger.debug(f"STOP evaluating because best_score>= beta ( {best_score} >= {beta} )")
-                logger.pop_context()
-                return (best_score, best_move)
-            alpha = max(alpha, best_score)
-            if best_score < alpha:
-                logger.debug(f"STOP evaluating because best_score<= alpha ( {best_score} <= {alpha} )")
-                logger.pop_context()
-                return (best_score, best_move)
-            beta = min(beta, best_score)
-            """
 
         logger.debug(f'END: best move {best_move}: score={best_score}')
         logger.pop_context()

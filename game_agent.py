@@ -10,24 +10,19 @@ import math
 import sys
 
 
-"""
-xalex
-"""
-
-from pprint import pprint
 
 
+directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
+              (1, -2), (1, 2), (2, -1), (2, 1)]
 
-
-
-
+directions_2 = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
+              (1, -2), (1, 2), (2, -1), (2, 1)]
 
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
 
-#open move
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -51,27 +46,157 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    if False:
-        if game.is_loser(player):
-            # return float("-inf")
-            return float(-100)
+    x, y = game.get_player_location(player)
+    delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    return float(len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player)))) - delta
 
-        if game.is_winner(player):
-            # return float("inf")
-            return float(100)
 
-    if False and game.move_count<2:
-        return float(len( game.get_legal_moves(player) ))
+def custom_score_adv(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
 
-    # return 0
-    # return float(len( game.get_legal_moves(player) ) )
-    # return float(len( game.get_legal_moves(player) ) - len(game.get_legal_moves(game.get_opponent(player))))
-    x,y = game.get_player_location(player)
-    delta = float((abs(3-x) + abs(3-y))/2)
-    return float(len( game.get_legal_moves(player) ) - 0.5*len(game.get_legal_moves(game.get_opponent(player)))) - delta
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
 
-    # return float(len(game.get_legal_moves(player)) + x)
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
 
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    return float(len(game.get_legal_moves(player)) - 0.7 * len(game.get_legal_moves(game.get_opponent(player))))
+
+def custom_score_adv_opt(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    xp,yp = game.__last_player_move__[player]
+    xo,yo = game.__last_player_move__[game.get_opponent(player)]
+
+    score = 0
+    for dx, dy in directions:
+        if 0 <= xp+dx < game.height and 0 <= yp+dy < game.width and \
+           game.__board_state__[xp+dx][yp+dy] == game.BLANK:
+            score += 1
+        if 0 <= xo+dx < game.height and 0 <= yo+dy < game.width and \
+           game.__board_state__[xo+dx][yo+dy] == game.BLANK:
+            score += ( -.7)
+
+    return float(score)
+
+
+def custom_score_center(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    delta = float(abs(3 - x) + abs(3 - y))
+    return float(len(game.get_legal_moves(player)) - delta /3)
+
+def custom_score_margins(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    delta = float(abs(3 - x) + abs(3 - y))
+    return float(len(game.get_legal_moves(player)) + delta /3)
+
+
+
+def custom_score_coop(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    x, y = game.get_player_location(player)
+    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    return float(len(game.get_legal_moves(player)) + 0.5 * len(game.get_legal_moves(game.get_opponent(player))))
 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
@@ -105,13 +230,15 @@ class CustomPlayer:
 
     def __init__(self, search_depth=3, score_fn=custom_score,
                  iterative=True, method='minimax', timeout=20.):
+        self.max_depth_reached = 0
+        self.stats_by_depth = {}
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
         self.method = method
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
-        self.current_depth_nodes = 0;
+        self.current_depth_nodes = 0
         #xalex
         self.moves_by_depth = []
 
@@ -120,13 +247,6 @@ class CustomPlayer:
         :return: name of caller
         """
 
-        """
-        obj = sys._getframe(1).f_code
-        for attr in dir(obj):
-            print(            "obj.%s = %s\n" % (attr, getattr(obj, attr)))
-
-        exit()
-        """
         return sys._getframe(1).f_code.co_name
 
     def get_move(self, game, legal_moves, time_left):
@@ -167,19 +287,7 @@ class CustomPlayer:
 
         self.time_left = time_left
 
-        self.stats_by_depth = {}
         # print()
-
-        """
-        if game.move_count == 0:
-            return (3,3)
-
-        if game.move_count == 1:
-            if game.__board_state__[3,3] == game.BLANK:
-                return (3,3)
-            else:
-                return (3, 4)
-        """
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -202,18 +310,17 @@ class CustomPlayer:
             local_best_score = -math.inf
 
             reiterate = True
-            self.current_depth_nodes = 0;
+            self.current_depth_nodes = 0
 
             while reiterate:
-                self.max_depth_reached = 0;
-                self.current_depth_nodes = 0;
+                self.current_depth_nodes = 0
                 if len(legal_moves) <1:
                     return best_move
 
                 for move_idx, possible_move in enumerate(legal_moves):
                     time_left_at_start = self.time_left()
                     possible_game = game.forecast_move(possible_move)
-                    forecast_couter = forecast_couter + 1
+                    forecast_couter += 1
                     # possible_game = game.forecast_move(possible_move)
                     # possible_score, recommended_move = self.minimax(possible_game,1,True)
                     if self.method == 'minimax':
@@ -232,7 +339,7 @@ class CustomPlayer:
                     return local_best_move
 
                 best_move = local_best_move
-                current_depth = current_depth+1
+                current_depth += 1
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -313,9 +420,9 @@ class CustomPlayer:
         forecast_couter = 0
         for possible_move in legal_moves:
 
-            forecast_couter = forecast_couter + 1
+            forecast_couter += 1
             possible_game = game.forecast_move(possible_move)
-            moves_couter = moves_couter+1
+            moves_couter += 1
 
             current_score, optimal_move = self.minimax(possible_game, depth - 1, not maximizing_player)
 
@@ -442,11 +549,11 @@ class CustomPlayer:
             """
 
         for possible_move in legal_moves:
-            forecast_couter = forecast_couter + 1
+            forecast_couter += 1
             possible_game = game.forecast_move(possible_move)
             # possible_score = self.score(possible_game, scoring_player)
             # l_moves.append({'move': possible_move, 'score': possible_score, 'game': possible_game})
-            moves_counter = moves_counter+1
+            moves_counter += 1
 
 
             current_score, optimal_move = self.alphabeta(possible_game, depth - 1, alpha, beta, not maximizing_player)
@@ -471,14 +578,5 @@ class CustomPlayer:
 
             if alpha>=beta:
                 return (best_score, best_move)
-
-            """
-            if best_score > beta:
-                return (best_score, best_move)
-            alpha = max(alpha, best_score)
-            if best_score < alpha:
-                return (best_score, best_move)
-            beta = min(beta, best_score)
-            """
 
         return (best_score, best_move)

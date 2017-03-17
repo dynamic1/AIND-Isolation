@@ -140,14 +140,9 @@ def makeEvalStop(limit, timer, value=None):
     """
 
     def score(game, player):
-        # print(f"game counts: {game.counts[0]}")
         if timer.time_left() < 0:
-            # raise TimeoutError("Timer expired during search. You must " +
-            #                    "return an answer before the timer reaches 0.")
-            raise TimeoutError("Simulated Timer expired during search. when a fixed number "+
-                               "of node expansions have been perfomred "+
-                                "during the search. This ensures that the search algorithm should always be " +
-                                "in a predictable state regardless of node expansion order..")
+            raise TimeoutError("Timer expired during search. You must " +
+                               "return an answer before the timer reaches 0.")
         if limit == game.counts[0]:
             timer.time_limit = 0
         return 0
@@ -233,7 +228,7 @@ class Project1Test(unittest.TestCase):
         return agentUT, board
 
     @timeout(5)
-    #@unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
     def test_heuristic(self):
         """ Test output interface of heuristic score function interface."""
 
@@ -415,10 +410,6 @@ class Project1Test(unittest.TestCase):
             agentUT.time_left = lambda: 1e3
             _, move = agentUT.minimax(board, test_depth)
 
-            print(board.counts[0])
-            print(board.visited)
-            print(len(board.visited))
-            print(len(board.counter))
             num_explored_valid = board.counts[0] == counts[idx][0]
             num_unique_valid = board.counts[1] == counts[idx][1]
 
@@ -473,12 +464,6 @@ class Project1Test(unittest.TestCase):
             agentUT.time_left = lambda: 1e3
             _, move = agentUT.alphabeta(board, test_depth)
 
-
-            # print(board.counts[0])
-            # print(board.visited)
-            # print(len(board.visited))
-            # print(len(board.counter))
-            # print(f"expect explored={counts[idx][0]}, actual={board.counts[0]}")
             num_explored_valid = board.counts[0] == counts[idx][0]
             num_unique_valid = board.counts[1] == counts[idx][1]
 
@@ -529,7 +514,7 @@ class Project1Test(unittest.TestCase):
         exact_counts = [(8, 8), (32, 10), (160, 39), (603, 35), (1861, 54), (3912, 62)]
 
         for idx in range(len(origins)):
-            print(f"expect max explored={exact_counts[idx][0]}")
+
             # set the initial timer high enough that the search will not
             # timeout before triggering the dynamic timer to halt by visiting
             # the expected number of nodes
@@ -544,11 +529,6 @@ class Project1Test(unittest.TestCase):
 
             diff_total = abs(board.counts[0] - exact_counts[idx][0])
             diff_unique = abs(board.counts[1] - exact_counts[idx][1])
-
-            print(board.counts[0])
-            print(board.visited)
-            print(len(board.visited))
-            print(len(board.counter))
 
             self.assertTrue(diff_total <= 1 and diff_unique == 0, ID_FAIL)
 
