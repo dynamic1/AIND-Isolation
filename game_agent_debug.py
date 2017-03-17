@@ -50,10 +50,13 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    utility = game.utility(player)
+    if utility:
+        return utility
 
     x, y = game.get_player_location(player)
     delta = float((abs(3 - x) + abs(3 - y)) / 2)
-    return float(len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player)))) - delta
+    return float( len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player)))) - delta
 
 
 def custom_score_adv(game, player):
@@ -105,17 +108,17 @@ def custom_score_adv_opt(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    xp,yp = game.__last_player_move__[player]
-    xo,yo = game.__last_player_move__[game.get_opponent(player)]
+    rp, cp = game.__last_player_move__[player]
+    ro, co = game.__last_player_move__[game.get_opponent(player)]
 
     score = 0
-    for dx, dy in directions:
-        if 0 <= xp+dx < game.height and 0 <= yp+dy < game.width and \
-           game.__board_state__[xp+dx][yp+dy] == game.BLANK:
+    for dr, dc in directions:
+        if 0 <= rp+dr < game.height and 0 <= cp+dc < game.width and \
+           game.__board_state__[rp+dr][cp+dc] == game.BLANK:
             score += 1
-        if 0 <= xo+dx < game.height and 0 <= yo+dy < game.width and \
-           game.__board_state__[xo+dx][yo+dy] == game.BLANK:
-            score += ( -.7)
+        if 0 <= ro+dr < game.height and 0 <= co+dc < game.width and \
+           game.__board_state__[ro+dr][co+dc] == game.BLANK:
+            score += (-.7)
 
     return float(score)
 
@@ -637,7 +640,7 @@ class CustomPlayer:
             else:
                 beta = min(beta, best_score)
 
-            if alpha>=beta:
+            if alpha>beta:
                 logger.debug(f"STOP evaluating because alpha >= beta ( {alpha} >= {beta} )")
                 logger.pop_context()
                 return (best_score, best_move)
