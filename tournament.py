@@ -82,6 +82,7 @@ def play_match(player1, player2):
 
     # play both games and tally the results
     for game in games:
+        print("new game")
         winner, _, termination = game.play(time_limit=TIME_LIMIT)
 
         if player1 == winner:

@@ -20,15 +20,12 @@ logger = xlogger()
 directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
               (1, -2), (1, 2), (2, -1), (2, 1)]
 
-directions_2 = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
-              (1, -2), (1, 2), (2, -1), (2, 1)]
-
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
 
-def custom_score(game, player):
+def custom_score_adv_center(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -54,61 +51,16 @@ def custom_score(game, player):
     # if utility:
     #     return utility
 
-    # x, y = game.get_player_location(player)
-    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
-    return float( len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player))))
+    x, y = game.get_player_location(player)
+    delta = float((abs(3 - x) + abs(3 - y)) / 3)
     return float( len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player)))) - delta
 
 
-def custom_score_adv(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
+def custom_score(game, player):
 
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
-
-    x, y = game.get_player_location(player)
-    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
     return float(len(game.get_legal_moves(player)) - 0.7 * len(game.get_legal_moves(game.get_opponent(player))))
 
 def custom_score_adv_opt(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
     rp, cp = game.__last_player_move__[player]
     ro, co = game.__last_player_move__[game.get_opponent(player)]
 
@@ -125,54 +77,12 @@ def custom_score_adv_opt(game, player):
 
 
 def custom_score_center(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
 
     x, y = game.get_player_location(player)
     delta = float(abs(3 - x) + abs(3 - y))
     return float(len(game.get_legal_moves(player)) - delta /3)
 
 def custom_score_margins(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
 
     x, y = game.get_player_location(player)
     delta = float(abs(3 - x) + abs(3 - y))
@@ -181,30 +91,7 @@ def custom_score_margins(game, player):
 
 
 def custom_score_coop(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
 
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
-
-    x, y = game.get_player_location(player)
-    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
     return float(len(game.get_legal_moves(player)) + 0.5 * len(game.get_legal_moves(game.get_opponent(player))))
 
 class CustomPlayer:
