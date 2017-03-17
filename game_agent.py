@@ -514,7 +514,7 @@ class CustomPlayer:
         # if there are no available moves
         if len(legal_moves)==0:
             if(game.is_loser(scoring_player)):
-                return (-math.inf, (-1,-1))
+                return (-math.inf, current_move)
                 # return (-math.inf ,(-1,-1))
 
             return (math.inf , current_move)
