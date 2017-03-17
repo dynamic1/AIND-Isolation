@@ -45,12 +45,13 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    utility = game.utility(player)
-    if utility:
-        return utility
+    # utility = game.utility(player)
+    # if utility:
+    #     return utility
 
-    x, y = game.get_player_location(player)
-    delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    # x, y = game.get_player_location(player)
+    # delta = float((abs(3 - x) + abs(3 - y)) / 2)
+    return float( len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player))))
     return float( len(game.get_legal_moves(player)) - 0.5 * len(game.get_legal_moves(game.get_opponent(player)))) - delta
 
 
@@ -579,7 +580,7 @@ class CustomPlayer:
             else:
                 beta = min(beta, best_score)
 
-            if alpha>beta:
-                return (best_score, best_move)
+            if alpha >= beta:
+                return best_score, best_move
 
-        return (best_score, best_move)
+        return best_score, best_move
